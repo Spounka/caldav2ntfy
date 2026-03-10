@@ -7,17 +7,15 @@ import pathlib
 import sys
 from datetime import datetime, timezone
 
-import dotenv
 import icalendar
 import inotify.adapters
 import inotify.constants as constants
 import requests
-from dotenv import dotenv_values
 
-logger = logging.getLogger(__name__)
+from caldav2ntfy.config import APP_NAME
+
+logger = logging.getLogger(APP_NAME)
 # import requests
-
-dotenv.load_dotenv()
 
 
 def create_calendar(file_path: pathlib.Path) -> icalendar.Calendar | None:
@@ -28,7 +26,7 @@ def create_calendar(file_path: pathlib.Path) -> icalendar.Calendar | None:
 
 
 def read_calendar_and_send_notification(
-    file: pathlib.Path, filename: str, url_root: str, topic: str, token: str
+    file: pathlib.Path, filename: str, server: str, topic: str, token: str
 ) -> None:
 
     cal = create_calendar(file / filename)
@@ -50,7 +48,7 @@ def read_calendar_and_send_notification(
 
         ntfy_at = str(int(dt.timestamp()))  # Unix timestamp
         response = requests.post(
-            f"{url_root}",
+            f"{server}",
             data=json.dumps(
                 {
                     "topic": topic,
@@ -70,9 +68,9 @@ def read_calendar_and_send_notification(
             logger.error(response.text)
 
 
-def cancel_notification(uuid: str, url_root: str, topic: str, token: str) -> None:
+def cancel_notification(uuid: str, server: str, topic: str, token: str) -> None:
     status = requests.delete(
-        f"{url_root}/{topic}/{uuid}",
+        f"{server}/{topic}/{uuid}",
         headers={
             "Authorization": f"Bearer {token}",
         },
@@ -81,7 +79,7 @@ def cancel_notification(uuid: str, url_root: str, topic: str, token: str) -> Non
     logging.info(f"{status.status_code=}")
 
 
-def _main(dir_path: str, url_root: str):
+def main(server: str, token: str, topic: str, dir_path: str):
     i = inotify.adapters.Inotify()
 
     logger.info(f"Dir root: {dir_path}")
@@ -111,7 +109,7 @@ def _main(dir_path: str, url_root: str):
                 continue
             if type_name in ["IN_MOVED_TO"]:
                 read_calendar_and_send_notification(
-                    file, filename, url_root, topic, token
+                    file, filename, server, topic, token
                 )
 
             elif type_name in ["IN_DELETE"]:
@@ -120,37 +118,8 @@ def _main(dir_path: str, url_root: str):
                 )
                 cancel_notification(
                     uuid=pathlib.Path(filename).stem,
-                    url_root=url_root,
+                    server=server,
                     topic=topic,
                     token=token,
                 )
                 logger.info(f"Deleted a file {filename}")
-
-
-def print_usage():
-    print("Usage: <program> </path/to/dir> https://url_to_ntfy_server/")
-
-
-def main():
-    logging.basicConfig(filename="app.log", level=logging.INFO)
-    if len(sys.argv) < 3:
-        print("[ERROR]: Wrong number of arguments provided", file=sys.stderr)
-        print_usage()
-        exit(1)
-    if len(sys.argv) > 3:
-        print("[ERROR]: Extra arguments provided", file=sys.stderr)
-        print_usage()
-        exit(1)
-
-    if not pathlib.Path(sys.argv[1]).exists():
-        print(f"[ERROR]: Provided dir {sys.argv[1]} does not exist", file=sys.stderr)
-        exit(1)
-
-    dir_path = sys.argv[1]
-    site_url = sys.argv[2]
-    _main(dir_path, site_url)
-    return 0
-
-
-if __name__ == "__main__":
-    main()
