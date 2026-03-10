@@ -1,11 +1,15 @@
+import logging
 from argparse import ArgumentParser
 
-from caldav2ntfy.config import find_config, load_config
+from caldav2ntfy.config import APP_NAME, find_config, load_config, setup_logger
 
 config: dict = {}
 
 
 def main():
+    setup_logger()
+    logger = logging.getLogger(APP_NAME)
+
     parser = ArgumentParser()
 
     parser.add_argument("--config", help="Path to custom configuration file")
@@ -23,4 +27,4 @@ def main():
         config["ntfy"]["token"] = args.token
     if args.topic:
         config["ntfy"]["topic"] = args.topic
-    print(config)
+    logger.info(f"Loaded Config with the following params: {config}")
