@@ -1,3 +1,6 @@
+[app]
+default_watch_dir=""
+
 [ntfy]
 server=""
 topic=""
