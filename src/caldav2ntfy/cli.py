@@ -17,4 +17,10 @@ def main():
     config_path = find_config(args.config)
 
     config = load_config(config_path) if config_path else {}
-    print(config_path)
+    if args.ntfy_server:
+        config["ntfy"]["server"] = args.ntfy_server
+    if args.token:
+        config["ntfy"]["token"] = args.token
+    if args.topic:
+        config["ntfy"]["topic"] = args.topic
+    print(config)
