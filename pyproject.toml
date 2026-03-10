@@ -1,0 +1,32 @@
+[project]
+name = "caldav2ntfy"
+version = "0.1.0"
+description = "Monitor caldav file changes and send notifications to an ntfy server"
+authors = [
+    {name = "Nazih Boudaakkar",email = "nazih@spounka.top"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "inotify (>=0.2.12,<0.3.0)",
+    "icalendar (>=7.0.3,<8.0.0)",
+    "requests (>=2.32.5,<3.0.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)"
+]
+
+[project.scripts]
+caldav2ntfy = "caldav2ntfy.main:main"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "black (>=26.3.0,<27.0.0)",
+    "isort (>=8.0.1,<9.0.0)",
+    "flake8 (>=7.3.0,<8.0.0)",
+    "mypy (>=1.19.1,<2.0.0)",
+    "types-requests (>=2.32.4.20260107,<3.0.0.0)"
+]
