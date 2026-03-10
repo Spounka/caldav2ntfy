@@ -16,7 +16,11 @@ dependencies = [
 
 [project.scripts]
 caldav2ntfy = "caldav2ntfy.main:main"
+clitest = "caldav2ntfy.cli:main"
 
+[[tool.mypy.overrides]]
+module = ["inotify", "inotify.*"]
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -28,5 +32,7 @@ dev = [
     "isort (>=8.0.1,<9.0.0)",
     "flake8 (>=7.3.0,<8.0.0)",
     "mypy (>=1.19.1,<2.0.0)",
-    "types-requests (>=2.32.4.20260107,<3.0.0.0)"
+    "types-requests (>=2.32.4.20260107,<3.0.0.0)",
+    "python-language-server (>=0.36.2,<0.37.0)",
+    "pyrefly (>=0.55.0,<0.56.0)"
 ]
