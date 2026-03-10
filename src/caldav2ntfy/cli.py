@@ -9,7 +9,7 @@ def main():
     parser = ArgumentParser()
 
     parser.add_argument("--config", help="Path to custom configuration file")
-    parser.add_argument("--ntfy-url", help="Override ntfy url")
+    parser.add_argument("--ntfy-server", help="Override ntfy url")
     parser.add_argument("--token", help="Override ntfy token")
     parser.add_argument("--topic", help="Override ntfy topic")
     args = parser.parse_args()
