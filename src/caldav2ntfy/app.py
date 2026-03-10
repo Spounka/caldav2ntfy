@@ -1,19 +1,17 @@
 import json
 import logging
-import os
 import pathlib
-import sys
 from datetime import datetime, timezone
 
 import icalendar
 import inotify.adapters
 import inotify.constants as constants
 import requests
+from icalendar.cal import Event
 
 from caldav2ntfy.config import APP_NAME
 
 logger = logging.getLogger(APP_NAME)
-# import requests
 
 
 def create_calendar(file_path: pathlib.Path) -> icalendar.Calendar | None:
@@ -21,6 +19,41 @@ def create_calendar(file_path: pathlib.Path) -> icalendar.Calendar | None:
         logger.error(f"Provided path {file_path.as_posix()} does not exist")
         return None
     return icalendar.Calendar.from_ical(file_path)
+
+
+def send_notification(event: Event, server: str, topic: str, token: str = "") -> None:
+    logging.info(f"Sending notification for {event.summary} {event.description}")
+    logging.info(f"Notification date: {str(event.start)}")
+    dt = event.decoded("DTSTART").dt
+
+    # If it's an all-day event, convert date -> datetime
+    if not isinstance(dt, datetime):
+        dt = datetime.combine(dt, datetime.min.time())
+
+    # Make it timezone-aware if needed
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)  # or your local tz
+
+    ntfy_at = str(int(dt.timestamp()))  # Unix timestamp
+    response = requests.post(
+        f"{server}",
+        data=json.dumps(
+            {
+                "topic": topic,
+                "title": event.summary,
+                "sequence_id": event.uid,
+                "delay": ntfy_at,
+                "message": event.description,
+            }
+        ),
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+        # headers={"At": str(event.start)},
+    )
+    logger.info(f"{response.status_code=}, id={event.uid}")
+    if response.status_code >= 400:
+        logger.error(response.text)
 
 
 def read_calendar_and_send_notification(
@@ -32,38 +65,7 @@ def read_calendar_and_send_notification(
         logging.warning(f"Calendar none {file/filename}")
         return
     for e in cal.events:
-        logging.info(f"Sending notification for {e.summary} {e.description}")
-        logging.info(f"Notification date: {str(e.start)}")
-        dt = e["DTSTART"].dt  # or: e.decoded("DTSTART")
-
-        # If it's an all-day event, convert date -> datetime
-        if not isinstance(dt, datetime):
-            dt = datetime.combine(dt, datetime.min.time())
-
-        # Make it timezone-aware if needed
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)  # or your local tz
-
-        ntfy_at = str(int(dt.timestamp()))  # Unix timestamp
-        response = requests.post(
-            f"{server}",
-            data=json.dumps(
-                {
-                    "topic": topic,
-                    "title": e.summary,
-                    "sequence_id": e.uid,
-                    "delay": ntfy_at,
-                    "message": e.description,
-                }
-            ),
-            headers={
-                "Authorization": f"Bearer {token}",
-            },
-            # headers={"At": str(e.start)},
-        )
-        logger.info(f"{response.status_code=}, id={e.uid}")
-        if response.status_code >= 400:
-            logger.error(response.text)
+        send_notification(e, server, topic, token)
 
 
 def cancel_notification(uuid: str, server: str, topic: str, token: str) -> None:
@@ -90,9 +92,6 @@ def main(server: str, token: str, topic: str, dir_path: str):
             | constants.IN_DELETE
         ),
     )
-
-    topic = os.getenv("topic", "")
-    token = os.getenv("token", "")
 
     logging.info(f"{topic=} {'TOKEN YES' if token != '' else 'TOKEN NONE'}")
 
