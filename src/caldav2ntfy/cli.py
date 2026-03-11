@@ -4,6 +4,7 @@ import logging
 from argparse import ArgumentParser, Namespace
 from typing import Any
 
+from caldav2ntfy import app
 from caldav2ntfy.config import APP_NAME, find_config, load_config, setup_logger
 
 config: dict = {}
@@ -42,3 +43,9 @@ def main():
     config = load_config(config_path) if config_path else {}
     config = override_config_from_cli_params(args, config)
     logger.info(f"Loaded Config with the following params: {config}")
+    app.main(
+        server=config.get("ntfy", {}).get("server", ""),
+        token=config.get("ntfy", {}).get("token", ""),
+        topic=config.get("ntfy", {}).get("topic", ""),
+        dir_path=config.get("app", {}).get("default_watch_dir", ""),
+    )

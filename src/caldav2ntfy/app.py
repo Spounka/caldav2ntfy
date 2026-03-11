@@ -21,10 +21,8 @@ def create_calendar(file_path: pathlib.Path) -> icalendar.Calendar | None:
     return icalendar.Calendar.from_ical(file_path)
 
 
-def send_notification(event: Event, server: str, topic: str, token: str = "") -> None:
-    logging.info(f"Sending notification for {event.summary} {event.description}")
-    logging.info(f"Notification date: {str(event.start)}")
-    dt = event.decoded("DTSTART").dt
+def get_timestamp_from_cal(event: Event) -> str:
+    dt = event.decoded("DTSTART")
 
     # If it's an all-day event, convert date -> datetime
     if not isinstance(dt, datetime):
@@ -34,26 +32,29 @@ def send_notification(event: Event, server: str, topic: str, token: str = "") ->
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)  # or your local tz
 
-    ntfy_at = str(int(dt.timestamp()))  # Unix timestamp
+    return str(int(dt.timestamp()))  # Unix timestamp
+
+
+def post_request(server: str, token: str, data: dict[str, str]) -> None:
     response = requests.post(
-        f"{server}",
-        data=json.dumps(
-            {
-                "topic": topic,
-                "title": event.summary,
-                "sequence_id": event.uid,
-                "delay": ntfy_at,
-                "message": event.description,
-            }
-        ),
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
-        # headers={"At": str(event.start)},
+        f"{server}", data=json.dumps(data), headers={"Authorization": f"Bearer {token}"}
     )
-    logger.info(f"{response.status_code=}, id={event.uid}")
+    logger.info(f"{response.status_code=}, id={data['sequence_id']}")
     if response.status_code >= 400:
         logger.error(response.text)
+
+
+def send_notification(event: Event, server: str, topic: str, token: str = "") -> None:
+    logging.info(f"Sending notification for {event.summary} {event.description}")
+    logging.info(f"Notification date: {str(event.start)}")
+    data = {
+        "topic": topic,
+        "title": event.summary,
+        "sequence_id": event.uid,
+        "delay": get_timestamp_from_cal(event),
+        "message": event.description,
+    }
+    post_request(server, token, data)
 
 
 def read_calendar_and_send_notification(
