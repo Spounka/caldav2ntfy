@@ -7,11 +7,50 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+
+keywords = [
+    "caldav",
+    "ntfy",
+    "calendar",
+    "notifications",
+    "cli",
+    "linux",
+    "automation",
+    "self-hosted",
+    "radicale",
+    "inotify"
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Office/Business :: Scheduling",
+    "Topic :: System :: Monitoring",
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14"
+]
+
 dependencies = [
     "inotify (>=0.2.12,<0.3.0)",
     "icalendar (>=7.0.3,<8.0.0)",
     "requests (>=2.32.5,<3.0.0)",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Spounka/caldav2ntfy"
+Repository = "https://github.com/Spounka/caldav2ntfy"
+Issues = "https://github.com/Spounka/caldav2ntfy/issues"
+Changelog = "https://github.com/Spounka/caldav2ntfy/releases"
 
 [project.scripts]
 caldav2ntfy = "caldav2ntfy.cli:main"

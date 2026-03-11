@@ -2,6 +2,7 @@
 
 import logging
 from argparse import ArgumentParser, Namespace
+from copy import deepcopy
 from typing import Any
 
 from caldav2ntfy import app
@@ -43,7 +44,8 @@ def main():
     config = load_config(config_path) if config_path else {}
     config = override_config_from_cli_params(args, config)
 
-    print_config = {**config, "token": "*****" if config["ntfy"]["token"] else ""}
+    print_config = deepcopy(config)
+    print_config["ntfy"]["token"] = "****"
     logger.info(f"Loaded Config with the following params: {print_config}")
     app.main(
         server=config.get("ntfy", {}).get("server", ""),
