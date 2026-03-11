@@ -2,6 +2,7 @@ import json
 import logging
 import pathlib
 from datetime import datetime, timezone
+from typing import cast
 
 import icalendar
 import inotify.adapters
@@ -22,7 +23,8 @@ def create_calendar(file_path: pathlib.Path) -> icalendar.Calendar | None:
     if not file_path.exists():
         logger.error(f"Provided path {file_path.as_posix()} does not exist")
         return None
-    return icalendar.Calendar.from_ical(file_path)
+    component = icalendar.Calendar.from_ical(file_path.as_posix())
+    return cast(icalendar.Calendar, component)
 
 
 def get_timestamp_from_cal(event: Event) -> str:
@@ -49,12 +51,14 @@ def post_request(data: dict[str, str]) -> None:
 
 
 def get_notification_data(event: Event) -> dict[str, str]:
+    summary = str(event.get("summary", ""))
+    description = str(event.get("description", ""))
     return {
         "topic": TOPIC,
-        "title": event.summary,
+        "title": summary,
         "sequence_id": event.uid,
         "delay": get_timestamp_from_cal(event),
-        "message": event.description,
+        "message": description,
     }
 
 
