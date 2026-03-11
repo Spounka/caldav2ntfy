@@ -42,7 +42,9 @@ def main():
 
     config = load_config(config_path) if config_path else {}
     config = override_config_from_cli_params(args, config)
-    logger.info(f"Loaded Config with the following params: {config}")
+
+    print_config = {**config, "token": "*****" if config["ntfy"]["token"] else ""}
+    logger.info(f"Loaded Config with the following params: {print_config}")
     app.main(
         server=config.get("ntfy", {}).get("server", ""),
         token=config.get("ntfy", {}).get("token", ""),
