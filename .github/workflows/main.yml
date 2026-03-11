@@ -1,0 +1,17 @@
+# .github/workflows/tests.yml
+name: tox tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@v5
+      - run: uv tool install tox --with tox-uv
+      - run: tox run -e ${{ matrix.python-version }}
