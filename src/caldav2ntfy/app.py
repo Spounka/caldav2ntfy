@@ -51,8 +51,9 @@ def post_request(data: dict[str, str]) -> None:
 
 
 def get_notification_data(event: Event) -> dict[str, str]:
-    summary = str(event.get("summary", ""))
-    description = str(event.get("description", ""))
+    summary = getattr(event, "summary", "")
+    description = getattr(event, "description", "")
+    print(event.get("description"))
     return {
         "topic": TOPIC,
         "title": summary,
