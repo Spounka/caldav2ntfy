@@ -3,7 +3,7 @@ name = "caldav2ntfy"
 version = "0.1.0"
 description = "Monitor caldav file changes and send notifications to an ntfy server"
 authors = [
-    {name = "Nazih Boudaakkar",email = "nazih@spounka.top"}
+    {name = "Nazih Boudaakkar",email = "nazih.boudaakkar@proton.me"}
 ]
 readme = "README.md"
 requires-python = ">=3.11"
