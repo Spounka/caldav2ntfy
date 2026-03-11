@@ -13,6 +13,10 @@ from caldav2ntfy.config import APP_NAME
 
 logger = logging.getLogger(APP_NAME)
 
+TOKEN = ""
+SERVER = ""
+TOPIC = ""
+
 
 def create_calendar(file_path: pathlib.Path) -> icalendar.Calendar | None:
     if not file_path.exists():
@@ -35,45 +39,30 @@ def get_timestamp_from_cal(event: Event) -> str:
     return str(int(dt.timestamp()))  # Unix timestamp
 
 
-def post_request(server: str, token: str, data: dict[str, str]) -> None:
+def post_request(data: dict[str, str]) -> None:
     response = requests.post(
-        f"{server}", data=json.dumps(data), headers={"Authorization": f"Bearer {token}"}
+        f"{SERVER}", data=json.dumps(data), headers={"Authorization": f"Bearer {TOKEN}"}
     )
     logger.info(f"{response.status_code=}, id={data['sequence_id']}")
     if response.status_code >= 400:
         logger.error(response.text)
 
 
-def send_notification(event: Event, server: str, topic: str, token: str = "") -> None:
-    logging.info(f"Sending notification for {event.summary} {event.description}")
-    logging.info(f"Notification date: {str(event.start)}")
-    data = {
-        "topic": topic,
+def get_notification_data(event: Event) -> dict[str, str]:
+    return {
+        "topic": TOPIC,
         "title": event.summary,
         "sequence_id": event.uid,
         "delay": get_timestamp_from_cal(event),
         "message": event.description,
     }
-    post_request(server, token, data)
 
 
-def read_calendar_and_send_notification(
-    file: pathlib.Path, filename: str, server: str, topic: str, token: str
-) -> None:
-
-    cal = create_calendar(file / filename)
-    if cal is None:
-        logging.warning(f"Calendar none {file/filename}")
-        return
-    for e in cal.events:
-        send_notification(e, server, topic, token)
-
-
-def cancel_notification(uuid: str, server: str, topic: str, token: str) -> None:
+def cancel_notification(uuid: str) -> None:
     status = requests.delete(
-        f"{server}/{topic}/{uuid}",
+        f"{SERVER}/{TOPIC}/{uuid}",
         headers={
-            "Authorization": f"Bearer {token}",
+            "Authorization": f"Bearer {TOKEN}",
         },
     )
     logging.info(f"Deleting notification {uuid}")
@@ -81,6 +70,14 @@ def cancel_notification(uuid: str, server: str, topic: str, token: str) -> None:
 
 
 def main(server: str, token: str, topic: str, dir_path: str):
+    global TOPIC
+    global SERVER
+    global TOKEN
+
+    TOPIC = topic or ""
+    SERVER = server or ""
+    TOKEN = token or ""
+
     i = inotify.adapters.Inotify()
 
     logger.info(f"Dir root: {dir_path}")
@@ -106,9 +103,13 @@ def main(server: str, token: str, topic: str, dir_path: str):
             if pathlib.Path(filename).suffix != ".ics":
                 continue
             if type_name in ["IN_MOVED_TO"]:
-                read_calendar_and_send_notification(
-                    file, filename, server, topic, token
-                )
+                cal = create_calendar(file / filename)
+                if cal is None:
+                    logging.warning(f"No valid calendar under {file/filename}")
+                    continue
+                for e in cal.events:
+                    data = get_notification_data(e)
+                    post_request(data)
 
             elif type_name in ["IN_DELETE"]:
                 logger.info(
@@ -116,8 +117,4 @@ def main(server: str, token: str, topic: str, dir_path: str):
                 )
                 cancel_notification(
                     uuid=pathlib.Path(filename).stem,
-                    server=server,
-                    topic=topic,
-                    token=token,
                 )
-                logger.info(f"Deleted a file {filename}")
