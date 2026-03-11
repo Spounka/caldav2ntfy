@@ -1,6 +1,6 @@
 [project]
 name = "caldav2ntfy"
-version = "0.1.3"
+version = "0.1.4"
 description = "Monitor caldav file changes and send notifications to an ntfy server"
 authors = [
     {name = "Nazih Boudaakkar",email = "nazih.boudaakkar@proton.me"}
@@ -14,8 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-caldav2ntfy = "caldav2ntfy.main:main"
-clitest = "caldav2ntfy.cli:main"
+caldav2ntfy = "caldav2ntfy.cli:main"
 
 [[tool.mypy.overrides]]
 module = ["inotify", "inotify.*"]
