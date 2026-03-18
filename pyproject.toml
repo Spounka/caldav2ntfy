@@ -1,76 +1,75 @@
 [project]
 name = "caldav2ntfy"
-version = "0.1.5"
+version = "0.1.6"
 description = "Monitor caldav file changes and send notifications to an ntfy server"
-authors = [
-    {name = "Nazih Boudaakkar",email = "nazih.boudaakkar@proton.me"}
-]
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT"
-license-files = ["LICENSE"]
+authors = [{ name = "Nazih Boudaakkar", email = "nazih.boudaakkar@proton.me" }]
+
+license = { text = "MIT" }
 
 keywords = [
-    "caldav",
-    "ntfy",
-    "calendar",
-    "notifications",
-    "cli",
-    "linux",
-    "automation",
-    "self-hosted",
-    "radicale",
-    "inotify"
+  "automation",
+  "caldav",
+  "calendar",
+  "cli",
+  "inotify",
+  "linux",
+  "notifications",
+  "ntfy",
+  "radicale",
+  "self-hosted"
 ]
 
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Environment :: Console",
-    "Intended Audience :: End Users/Desktop",
-    "Intended Audience :: Information Technology",
-    "Intended Audience :: System Administrators",
-    "Operating System :: POSIX :: Linux",
-    "Topic :: Office/Business :: Scheduling",
-    "Topic :: System :: Monitoring",
-    "Topic :: Utilities",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14"
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Office/Business :: Scheduling",
+  "Topic :: System :: Monitoring",
+  "Topic :: Utilities"
 ]
 
 dependencies = [
-    "inotify (>=0.2.12,<0.3.0)",
-    "icalendar (>=7.0.3,<8.0.0)",
-    "requests (>=2.32.5,<3.0.0)",
+  "icalendar (>=7.0.3,<8.0.0)",
+  "inotify (>=0.2.12,<0.3.0)",
+  "requests (>=2.32.5,<3.0.0)",
 ]
 
 [project.urls]
-Homepage = "https://github.com/Spounka/caldav2ntfy"
-Repository = "https://github.com/Spounka/caldav2ntfy"
-Issues = "https://github.com/Spounka/caldav2ntfy/issues"
 Changelog = "https://github.com/Spounka/caldav2ntfy/releases"
+Homepage = "https://github.com/Spounka/caldav2ntfy"
+Issues = "https://github.com/Spounka/caldav2ntfy/issues"
+Repository = "https://github.com/Spounka/caldav2ntfy"
 
 [project.scripts]
 caldav2ntfy = "caldav2ntfy.cli:main"
 
-[[tool.mypy.overrides]]
-module = ["inotify", "inotify.*"]
-ignore_missing_imports = true
+[dependency-groups]
+dev = [
+  "black (>=26.3.0,<27.0.0)",
+  "flake8 (>=7.3.0,<8.0.0)",
+  "isort (>=8.0.1,<9.0.0)",
+  "mypy (>=1.19.1,<2.0.0)",
+  "pyrefly (>=0.55.0,<0.56.0)",
+  "tox (>=4.49.1,<5.0.0)",
+  "twine (>=6.2.0,<7.0.0)",
+  "types-requests (>=2.32.4.20260107,<3.0.0.0)"
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[dependency-groups]
-dev = [
-    "black (>=26.3.0,<27.0.0)",
-    "isort (>=8.0.1,<9.0.0)",
-    "flake8 (>=7.3.0,<8.0.0)",
-    "mypy (>=1.19.1,<2.0.0)",
-    "types-requests (>=2.32.4.20260107,<3.0.0.0)",
-    "pyrefly (>=0.55.0,<0.56.0)",
-    "tox (>=4.49.1,<5.0.0)",
-    "twine (>=6.2.0,<7.0.0)"
-]
+[[tool.mypy.overrides]]
+module = ["inotify", "inotify.*"]
+ignore_missing_imports = true
