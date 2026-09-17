@@ -18,6 +18,8 @@ def parse_arguments() -> Namespace:
     parser.add_argument("--ntfy-server", help="Override ntfy url")
     parser.add_argument("--token", help="Override ntfy token")
     parser.add_argument("--topic", help="Override ntfy topic")
+    parser.add_argument("--cloudflare-id", help="Override cloudflare client ID")
+    parser.add_argument("--cloudflare-secret", help="Override cloudflare client secret")
     return parser.parse_args()
 
 
@@ -30,6 +32,10 @@ def override_config_from_cli_params(
         defaults["ntfy"]["token"] = args.token
     if args.topic:
         defaults["ntfy"]["topic"] = args.topic
+    if args.cloudflare_id:
+        defaults["cloudflare"]["id"] = args.cloudflare_id
+    if args.cloudflare_secret:
+        defaults["cloudflare"]["secret"] = args.cloudflare_secret
     return defaults
 
 
@@ -46,10 +52,15 @@ def main():
 
     print_config = deepcopy(config)
     print_config["ntfy"]["token"] = "****"
+    print_config["cloudflare"]["id"] = "****"
+    print_config["cloudflare"]["secret"] = "****"
+
     logger.info(f"Loaded Config with the following params: {print_config}")
     app.main(
         server=config.get("ntfy", {}).get("server", ""),
         token=config.get("ntfy", {}).get("token", ""),
         topic=config.get("ntfy", {}).get("topic", ""),
+        cf_id=config.get("cloudflare", {}).get("id", ""),
+        cf_secret=config.get("cloudflare", {}).get("secret", ""),
         dir_path=config.get("app", {}).get("default_watch_dir", ""),
     )

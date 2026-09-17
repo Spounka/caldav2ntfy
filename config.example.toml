@@ -5,3 +5,7 @@ default_watch_dir=""
 server=""
 topic=""
 token=""
+
+[cloudflare]
+id=""
+secret=""

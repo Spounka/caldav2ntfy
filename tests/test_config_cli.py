@@ -20,6 +20,10 @@ topic = "demo"
 
 [app]
 default_watch_dir = "/tmp/watch"
+
+[cloudflare]
+id = "id"
+secret = "secret"
 """.strip(),
                 encoding="utf-8",
             )
@@ -29,6 +33,8 @@ default_watch_dir = "/tmp/watch"
             self.assertEqual(data["ntfy"]["server"], "https://ntfy.example.com")
             self.assertEqual(data["ntfy"]["token"], "abc")
             self.assertEqual(data["ntfy"]["topic"], "demo")
+            self.assertEqual(data["cloudflare"]["id"], "id")
+            self.assertEqual(data["cloudflare"]["secret"], "secret")
             self.assertEqual(data["app"]["default_watch_dir"], "/tmp/watch")
 
     def test_find_config_uses_cli_path_first(self):
@@ -48,12 +54,18 @@ class TestCli(unittest.TestCase):
                 "server": "old-server",
                 "token": "old-token",
                 "topic": "old-topic",
-            }
+            },
+            "cloudflare": {
+                "id": "client-id",
+                "secret": "client-secret",
+            },
         }
         args = Namespace(
             ntfy_server="new-server",
             token="new-token",
             topic="new-topic",
+            cloudflare_id="new-id",
+            cloudflare_secret="new-secret",
             config=None,
         )
 
@@ -62,6 +74,8 @@ class TestCli(unittest.TestCase):
         self.assertEqual(result["ntfy"]["server"], "new-server")
         self.assertEqual(result["ntfy"]["token"], "new-token")
         self.assertEqual(result["ntfy"]["topic"], "new-topic")
+        self.assertEqual(result["cloudflare"]["id"], "new-id")
+        self.assertEqual(result["cloudflare"]["secret"], "new-secret")
 
     @patch("caldav2ntfy.cli.app.main")
     @patch("caldav2ntfy.cli.load_config")
@@ -81,6 +95,8 @@ class TestCli(unittest.TestCase):
             ntfy_server=None,
             token=None,
             topic=None,
+            cloudflare_id=None,
+            cloudflare_secret=None,
         )
         mock_find_config.return_value = Path("/fake/config.toml")
         mock_load_config.return_value = {
@@ -88,6 +104,10 @@ class TestCli(unittest.TestCase):
                 "server": "https://ntfy.example.com",
                 "token": "secret",
                 "topic": "demo",
+            },
+            "cloudflare": {
+                "id": "id",
+                "secret": "secret",
             },
             "app": {
                 "default_watch_dir": "/tmp/watch",
@@ -101,5 +121,7 @@ class TestCli(unittest.TestCase):
             server="https://ntfy.example.com",
             token="secret",
             topic="demo",
+            cf_id="id",
+            cf_secret="secret",
             dir_path="/tmp/watch",
         )

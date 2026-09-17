@@ -62,6 +62,8 @@ class TestApp(unittest.TestCase):
 
         app.SERVER = "https://ntfy.example.com"
         app.TOKEN = "secret"
+        app.CF_ID = "id"
+        app.CF_SECRET = "secret"
 
         payload = {
             "topic": "topic",
@@ -76,7 +78,11 @@ class TestApp(unittest.TestCase):
         mock_post.assert_called_once_with(
             "https://ntfy.example.com",
             data=json.dumps(payload),
-            headers={"Authorization": "Bearer secret"},
+            headers={
+                "Authorization": "Bearer secret",
+                "CF-Access-Client-Id": "id",
+                "CF-Access-Client-Secret": "secret",
+            },
         )
 
     @patch("caldav2ntfy.app.requests.delete")
@@ -86,10 +92,16 @@ class TestApp(unittest.TestCase):
         app.SERVER = "https://ntfy.example.com"
         app.TOKEN = "secret"
         app.TOPIC = "topic"
+        app.CF_ID = "id"
+        app.CF_SECRET = "secret"
 
         app.cancel_notification("uuid-1")
 
         mock_delete.assert_called_once_with(
             "https://ntfy.example.com/topic/uuid-1",
-            headers={"Authorization": "Bearer secret"},
+            headers={
+                "Authorization": "Bearer secret",
+                "CF-Access-Client-Id": "id",
+                "CF-Access-Client-Secret": "secret",
+            },
         )

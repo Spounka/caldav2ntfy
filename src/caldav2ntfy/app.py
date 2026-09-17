@@ -17,6 +17,8 @@ logger = logging.getLogger(APP_NAME)
 TOKEN = ""
 SERVER = ""
 TOPIC = ""
+CF_ID = ""
+CF_SECRET = ""
 
 
 def create_calendar(file_path: pathlib.Path) -> icalendar.Calendar | None:
@@ -43,7 +45,13 @@ def get_timestamp_from_cal(event: Event) -> str:
 
 def post_request(data: dict[str, str]) -> None:
     response = requests.post(
-        f"{SERVER}", data=json.dumps(data), headers={"Authorization": f"Bearer {TOKEN}"}
+        f"{SERVER}",
+        data=json.dumps(data),
+        headers={
+            "Authorization": f"Bearer {TOKEN}",
+            "CF-Access-Client-Id": CF_ID,
+            "CF-Access-Client-Secret": CF_SECRET,
+        },
     )
     logger.info(f"{response.status_code=}, id={data['sequence_id']}")
     if response.status_code >= 400:
@@ -68,20 +76,28 @@ def cancel_notification(uuid: str) -> None:
         f"{SERVER}/{TOPIC}/{uuid}",
         headers={
             "Authorization": f"Bearer {TOKEN}",
+            "CF-Access-Client-Id": CF_ID,
+            "CF-Access-Client-Secret": CF_SECRET,
         },
     )
     logging.info(f"Deleting notification {uuid}")
     logging.info(f"{status.status_code=}")
 
 
-def main(server: str, token: str, topic: str, dir_path: str):
+def main(
+    server: str, token: str, topic: str, cf_id: str, cf_secret: str, dir_path: str
+):
     global TOPIC
     global SERVER
     global TOKEN
+    global CF_ID
+    global CF_SECRET
 
     TOPIC = topic or ""
     SERVER = server or ""
     TOKEN = token or ""
+    CF_ID = cf_id or ""
+    CF_SECRET = cf_secret or ""
 
     i = inotify.adapters.Inotify()
 
